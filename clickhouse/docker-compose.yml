@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  clickhouse-server:
+    image: yandex/clickhouse-server
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123"  # HTTP port
+      - "9000:9000"  # Native TCP port
+      - "9009:9009"  # Replication port
+      - "8124:8124"  # HTTP port for local queries
+      - "9004:9004"  # TCP port for distributed queries
+    volumes:
+      - ./clickhouse_data:/var/lib/clickhouse
+    environment:
+      - CLICKHOUSE_CONFIG_FILE=/etc/clickhouse-server/config.xml
+
+  clickhouse-client:
+    image: yandex/clickhouse-client
+    container_name: clickhouse-client
+    depends_on:
+      - clickhouse-server
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true

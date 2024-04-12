@@ -3,3 +3,6 @@
 - redis
 - elastic
 - metabase
+- clickhouse
+- mysql
+- django (with celery and celery beat)

@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql-db
+    restart: always
+    environment:
+      #your Remember to replace placeholders like your_root_password, your_database_name, your_username, and your_password with your desired values. Additionally, adjust the ports and volumes as needed based on your requirements.
+      MYSQL_ROOT_PASSWORD: your_root_password
+      MYSQL_DATABASE: your_database_name
+      MYSQL_USER: your_username
+      MYSQL_PASSWORD: your_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql

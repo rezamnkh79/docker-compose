@@ -1,0 +1,47 @@
+version: '3.2'
+
+services:
+  adtrace_cip:
+    container_name: adtrace_cip
+    image: adtrace_cip:3.0.5
+
+    network_mode: microservice_nw
+
+    volumes:
+      - /home/var/log/adtrace_cip_service/:/app/adtrace_central_identity_provider_service/gunicorn_logs/
+
+    ports:
+      - 0.0.0.0:37500:37500
+
+    command: bash -c "gunicorn -w 15 -b 0.0.0.0:37500
+      --access-logfile /app/adtrace_central_identity_provider_service/gunicorn_logs/out.log
+      --error-logfile /app/adtrace_central_identity_provider_service/gunicorn_logs/err.log
+      --timeout 150 --chdir /app/adtrace_central_identity_provider_service/ adtrace_central_identity_provider.wsgi:application"
+
+  cip_celery:
+    container_name: adtrace_cip_celery
+    image: adtrace_cip:3.0.5
+
+    network_mode: microservice_nw
+
+    command: bash -c "celery -A adtrace_central_identity_provider worker -l info -Q central_identity_provider --concurrency=2
+      --logfile /app/adtrace_central_identity_provider_service/celery_logs/err.log"
+
+    volumes:
+      - /home/var/log/adtrace_cip_celery:/app/adtrace_central_identity_provider_service/celery_logs/
+    depends_on:
+      - adtrace_cip
+  cip_celery_beat:
+    container_name: adtrace_cip_celery_beat
+    image: adtrace_cip:3.0.5
+
+    network_mode: microservice_nw
+
+    command: bash -c "celery -A adtrace_central_identity_provider beat -l info
+      --logfile /app/adtrace_central_identity_provider_service/celery_beat_logs/err.log"
+
+    volumes:
+      - /home/var/log/adtrace_cip_celery_beat:/app/adtrace_central_identity_provider_service/celery_beat_logs/
+    depends_on:
+      - adtrace_cip
+      - cip_celery
